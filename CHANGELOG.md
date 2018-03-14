@@ -1,5 +1,9 @@
 # CHANGELOG for mcrouter
 
+## [v3.1.0]
+* Add support for installing mcrouter from pre-compiled binaries
+* Use attributes for automake package source for centos deps
+
 ## [v3.0.0] (2017-08-15)
 
 ### Breaking changes:

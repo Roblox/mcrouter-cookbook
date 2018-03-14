@@ -15,34 +15,43 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-folly_checkout_path = "#{Chef::Config[:file_cache_path]}/folly"
-folly_build_dir = "#{folly_checkout_path}/folly"
-folly_lib_path = '/usr/local/lib/libfolly.a'
-folly_build_install_command = <<-EOF
-LDFLAGS=-L/usr/local/lib CPPFLAGS=-I/usr/local/include ./configure && \
-make && make install
-EOF
 
-directory folly_checkout_path do
-  action :delete
-  recursive true
-  only_if { Dir.exist?(folly_checkout_path) }
-end
+if node['mcrouter']['install_type'] == 'source'
+  folly_checkout_path = "#{Chef::Config[:file_cache_path]}/folly"
+  folly_build_dir = "#{folly_checkout_path}/folly"
+  folly_lib_path = '/usr/local/lib/libfolly.a'
+  folly_build_install_command = <<-EOF
+  LDFLAGS=-L/usr/local/lib CPPFLAGS=-I/usr/local/include ./configure && \
+  make && make install
+  EOF
 
-git folly_checkout_path do
-  repository 'https://github.com/facebook/folly'
-  revision node['mcrouter']['folly_commit_hash']
-  action :sync
-end
+  directory folly_checkout_path do
+    action :delete
+    recursive true
+    only_if { Dir.exist?(folly_checkout_path) }
+  end
 
-execute 'Folly - Prepare build ' do
-  command 'autoreconf --install'
-  cwd folly_build_dir
-  not_if { File.exist?(folly_lib_path) }
-end
+  git folly_checkout_path do
+    repository 'https://github.com/facebook/folly'
+    revision node['mcrouter']['folly_commit_hash']
+    action :sync
+  end
 
-execute 'Folly - Build and install folly' do
-  cwd folly_build_dir
-  command folly_build_install_command
-  not_if { File.exist?(folly_lib_path) }
+  execute 'Folly - Prepare build ' do
+    command 'autoreconf --install'
+    cwd folly_build_dir
+    not_if { File.exist?(folly_lib_path) }
+  end
+
+  execute 'Folly - Build and install folly' do
+    cwd folly_build_dir
+    command folly_build_install_command
+    not_if { File.exist?(folly_lib_path) }
+  end
+else
+  package 'folly' do
+    version node['mcrouter']['packages']['folly']['version'] if node['mcrouter']['packages']['folly']['version']
+    source node['mcrouter']['packages']['folly']['source'] if node['mcrouter']['packages']['folly']['source']
+    action :install
+  end
 end

@@ -16,52 +16,60 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-mcrouter_checkout_path = "#{Chef::Config[:file_cache_path]}/mcrouter"
-mcrouter_build_dir = "#{mcrouter_checkout_path}/mcrouter"
-configure_command = <<-COMMAND
-LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" \
-LD_RUN_PATH="/usr/local/lib:$LD_RUN_PATH" \
-LDFLAGS="-L/usr/local/lib $LDFLAGS" \
-CPPFLAGS="-I/usr/local/include $CPPFLAGS" \
-./configure --prefix="#{node['mcrouter']['install_dir']}"
-COMMAND
-mcrouter_bin = '/usr/local/mcrouter/bin/mcrouter'
+if node['mcrouter']['install_type'] == 'source'
+  mcrouter_checkout_path = "#{Chef::Config[:file_cache_path]}/mcrouter"
+  mcrouter_build_dir = "#{mcrouter_checkout_path}/mcrouter"
+  configure_command = <<-COMMAND
+  LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" \
+  LD_RUN_PATH="/usr/local/lib:$LD_RUN_PATH" \
+  LDFLAGS="-L/usr/local/lib $LDFLAGS" \
+  CPPFLAGS="-I/usr/local/include $CPPFLAGS" \
+  ./configure --prefix="#{node['mcrouter']['install_dir']}"
+  COMMAND
+  mcrouter_bin = '/usr/local/mcrouter/bin/mcrouter'
 
-directory mcrouter_checkout_path do
-  action :delete
-  recursive true
-  only_if { Dir.exist?(mcrouter_checkout_path) }
-end
+  directory mcrouter_checkout_path do
+    action :delete
+    recursive true
+    only_if { Dir.exist?(mcrouter_checkout_path) }
+  end
 
-git mcrouter_checkout_path do
-  repository 'https://github.com/facebook/mcrouter.git'
-  checkout_branch node['mcrouter']['version-branch']
-  revision node['mcrouter']['version-branch']
-  action :sync
-end
+  git mcrouter_checkout_path do
+    repository 'https://github.com/facebook/mcrouter.git'
+    checkout_branch node['mcrouter']['version-branch']
+    revision node['mcrouter']['version-branch']
+    action :sync
+  end
 
-execute 'Mcrouter - Prepare build' do
-  command 'autoreconf --install'
-  cwd mcrouter_build_dir
-  not_if { File.exist?(mcrouter_bin) }
-end
+  execute 'Mcrouter - Prepare build' do
+    command 'autoreconf --install'
+    cwd mcrouter_build_dir
+    not_if { File.exist?(mcrouter_bin) }
+  end
 
-execute 'Mcrouter - Configure' do
-  cwd mcrouter_build_dir
-  command configure_command
-  not_if { ::File.exist?(mcrouter_bin) }
-end
+  execute 'Mcrouter - Configure' do
+    cwd mcrouter_build_dir
+    command configure_command
+    not_if { ::File.exist?(mcrouter_bin) }
+  end
 
-execute 'Mcrouter - Make' do
-  command 'make -j2'
-  cwd mcrouter_build_dir
-  not_if { File.exist?(mcrouter_bin) }
-end
+  execute 'Mcrouter - Make' do
+    command 'make -j2'
+    cwd mcrouter_build_dir
+    not_if { File.exist?(mcrouter_bin) }
+  end
 
-execute 'Mcrouter - Make install' do
-  command 'make install'
-  cwd mcrouter_build_dir
-  not_if { File.exist?(mcrouter_bin) }
+  execute 'Mcrouter - Make install' do
+    command 'make install'
+    cwd mcrouter_build_dir
+    not_if { File.exist?(mcrouter_bin) }
+  end
+else
+  package 'mcrouter' do
+    version node['mcrouter']['packages']['mcrouter']['version'] if node['mcrouter']['packages']['mcrouter']['version']
+    source node['mcrouter']['packages']['mcrouter']['source'] if node['mcrouter']['packages']['mcrouter']['source']
+    action :install
+  end
 end
 
 directory '/usr/local/mcrouter' do

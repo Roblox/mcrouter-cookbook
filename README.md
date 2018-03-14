@@ -41,6 +41,7 @@ If you wish to customize any of the configuration for mcrouter, you will want to
         + supply updated values for these in addition to your new options
         + specify your particular CLI option: `set['mcrouter']['cli_opts']['async-dir']`
 * `node['mcrouter']['config']` - See configuration options at [mcrouter wiki](https://github.com/facebook/mcrouter/wiki).
+* `node['mcrouter']['install_type']` - Set to `'package'` to install from pre-compiled binaries
 
 # Attributes
 * node['mcrouter']['install_dir'] - Installation path of mcrouter

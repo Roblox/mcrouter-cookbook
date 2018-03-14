@@ -18,7 +18,7 @@
 
 include_recipe 'mcrouter::_user'
 include_recipe 'mcrouter::_deps_centos' if node['platform'] == 'centos'
-include_recipe 'mcrouter::_deps_ubuntu_16.04' if node['platform'] == 'ubuntu' && node['platform_version'].to_f	== 16.04
+include_recipe 'mcrouter::_deps_ubuntu_16.04' if node['platform'] == 'ubuntu' && node['platform_version'].to_f	== 16.04 && node['mcrouter']['install_type'] == 'source'
 include_recipe 'memcached::default' if node['mcrouter']['local_memcached']
 include_recipe 'mcrouter::_double_conversion'
 include_recipe 'mcrouter::_folly'
