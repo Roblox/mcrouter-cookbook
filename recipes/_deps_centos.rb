@@ -19,44 +19,60 @@ include_recipe 'build-essential'
 include_recipe 'yum'
 include_recipe 'yum-epel'
 
-cache_dir = Chef::Config[:file_cache_path]
+if node['mcrouter']['install_type'] == 'source'
+  cache_dir = Chef::Config[:file_cache_path]
 
-%w(
-  autoconf
-  binutils-devel
-  bison
-  boost-devel
-  cmake
-  double-conversion-devel
-  flex
-  git
-  gflags-devel
-  glog-devel
-  jemalloc-devel
-  libtool
-  libevent-devel
-  make
-  openssl-devel
-  python-devel
-  ragel
-).each do |pkg|
-  package pkg
-end
+  %w(
+    autoconf
+    binutils-devel
+    bison
+    boost
+    boost-devel
+    cmake
+    double-conversion-devel
+    flex
+    git
+    gflags-devel
+    glog-devel
+    jemalloc-devel
+    libtool
+    libevent-devel
+    make
+    openssl-devel
+    python-devel
+    ragel
+  ).each do |pkg|
+    package pkg
+  end
 
-remote_file "#{cache_dir}/automake-1.15-4.fc23.noarch.rpm" do
-  source 'http://dl.fedoraproject.org/pub/fedora/linux/releases/23/Everything/x86_64/os/Packages/a/automake-1.15-4.fc23.noarch.rpm'
-  checksum 'cef878bfcfbd2115bd5cd95f2120f4bfdff30a262289cb83b1e2573eb77b4d91'
-end
+  remote_file "#{cache_dir}/automake-1.15-4.fc23.noarch.rpm" do
+    source node['mcrouter']['deps_centos']['automake']['source']
+    checksum node['mcrouter']['deps_centos']['automake']['checksum']
+  end
 
-rpm_package 'automake-1.15-4.fc23.noarch.rpm' do
-  source "#{cache_dir}/automake-1.15-4.fc23.noarch.rpm"
-  not_if "rpm -qa | grep -qx 'automake-1.15-4.fc23.noarch'"
-end
+  rpm_package 'automake-1.15-4.fc23.noarch.rpm' do
+    source "#{cache_dir}/automake-1.15-4.fc23.noarch.rpm"
+    not_if "rpm -qa | grep -qx 'automake-1.15-4.fc23.noarch'"
+  end
 
-magic_shell_environment 'CC' do
-  value '/opt/rh/devtoolset-4/root/usr/bin/gcc'
-end
+  magic_shell_environment 'CC' do
+    value '/opt/rh/devtoolset-4/root/usr/bin/gcc'
+  end
 
-magic_shell_environment 'CXX' do
-  value '/opt/rh/devtoolset-4/root/usr/bin/c++'
+  magic_shell_environment 'CXX' do
+    value '/opt/rh/devtoolset-4/root/usr/bin/c++'
+  end
+else
+  %w(
+    boost
+    flex
+    libevent
+    bison
+    ragel
+    snappy
+    gflags
+    glog
+  ).each do |pkg|
+    package pkg
+  end
 end
