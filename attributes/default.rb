@@ -30,6 +30,11 @@ default['mcrouter']['cli_opts'] = {
   'stats-root'  => '/var/mcrouter/stats'
 }
 
+default['mcrouter']['limits'] = {
+  # nproc: 81_920,
+  # nfile: 4096
+}
+
 default['mcrouter']['config'] = {
   'pools' => {
     'A' => {
