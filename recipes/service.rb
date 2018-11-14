@@ -24,6 +24,11 @@ systemd_service 'mcrouter' do
   service_working_directory '/usr/local/mcrouter/'
   service_exec_start "/usr/local/mcrouter/bin/mcrouter #{shell_opts(node['mcrouter']['cli_opts'])}"
   service_restart 'on-abort'
+
+  node['mcrouter']['limits'].each do | name, value|
+    send("service_limit_#{name}", value)
+  end
+
   install_wanted_by 'multi-user.target'
   action [:create, :restart]
 end

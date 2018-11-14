@@ -1,5 +1,8 @@
 # CHANGELOG for mcrouter
 
+## [v3.1.1]
+* Support setting limits in the systemd config for the mcrouter service
+
 ## [v3.1.0]
 * Add support for installing mcrouter from pre-compiled binaries
 * Use attributes for automake package source for centos deps
