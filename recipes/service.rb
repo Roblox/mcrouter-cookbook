@@ -30,5 +30,5 @@ systemd_service 'mcrouter' do
   end
 
   install_wanted_by 'multi-user.target'
-  action [:create, :restart]
+  action [:create]
 end

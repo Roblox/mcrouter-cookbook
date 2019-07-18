@@ -1,5 +1,8 @@
 # CHANGELOG for mcrouter
 
+## [v3.1.2]
+* Remove unconditional restart from mcrouter
+
 ## [v3.1.1]
 * Support setting limits in the systemd config for the mcrouter service
 
